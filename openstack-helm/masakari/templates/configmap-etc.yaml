@@ -15,6 +15,28 @@ limitations under the License.
 {{- if .Values.manifests.configmap_etc }}
 {{- $envAll := . }}
 
+{{- if empty .Values.conf.masakari_monitors.api.region -}}
+{{- $_ := set .Values.conf.masakari_monitors.api "region" .Values.endpoints.identity.auth.masakari.region_name -}}
+{{- end -}}
+{{- if empty .Values.conf.masakari_monitors.api.auth_url -}}
+{{- $_ := tuple "identity" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | set .Values.conf.masakari_monitors.api "auth_url" -}}
+{{- end -}}
+{{- if empty .Values.conf.masakari_monitors.api.user_domain_id -}}
+{{- $_ := set .Values.conf.masakari_monitors.api "user_domain_id" .Values.endpoints.identity.auth.masakari.user_domain_name -}}
+{{- end -}}
+{{- if empty .Values.conf.masakari_monitors.api.project_name -}}
+{{- $_ := set .Values.conf.masakari_monitors.api "project_name" .Values.endpoints.identity.auth.masakari.project_name -}}
+{{- end -}}
+{{- if empty .Values.conf.masakari_monitors.api.project_domain_id -}}
+{{- $_ := set .Values.conf.masakari_monitors.api "project_domain_id" .Values.endpoints.identity.auth.masakari.project_domain_name -}}
+{{- end -}}
+{{- if empty .Values.conf.masakari_monitors.api.username -}}
+{{- $_ := set .Values.conf.masakari_monitors.api "username" .Values.endpoints.identity.auth.masakari.username -}}
+{{- end -}}
+{{- if empty .Values.conf.masakari_monitors.api.password -}}
+{{- $_ := set .Values.conf.masakari_monitors.api "password" .Values.endpoints.identity.auth.masakari.password -}}
+{{- end -}}
+
 {{- if empty .Values.conf.masakari.DEFAULT.transport_url -}}
 {{- $_ := tuple "oslo_messaging" "internal" "masakari" "amqp" . | include "helm-toolkit.endpoints.authenticated_transport_endpoint_uri_lookup" | set .Values.conf.masakari.DEFAULT "transport_url" -}}
 {{- end -}}
@@ -32,7 +54,7 @@ limitations under the License.
 {{- end -}}
 
 {{- if empty .Values.conf.masakari.keystone_authtoken.www_authenticate_uri -}}
-{{- $_ := tuple "identity" "public" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | set .Values.conf.masakari.keystone_authtoken "www_authenticate_uri" -}}
+{{- $_ := tuple "identity" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | set .Values.conf.masakari.keystone_authtoken "www_authenticate_uri" -}}
 {{- end -}}
 {{- if empty .Values.conf.masakari.keystone_authtoken.auth_url -}}
 {{- $_ := tuple "identity" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | set .Values.conf.masakari.keystone_authtoken "auth_url" -}}
@@ -73,4 +95,12 @@ metadata:
 type: Opaque
 data:
   masakari.conf: {{ include "helm-toolkit.utils.to_oslo_conf" .Values.conf.masakari | b64enc }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: masakari-monitors-etc
+type: Opaque
+data:
+  masakari-monitors.conf: {{ include "helm-toolkit.utils.to_oslo_conf" .Values.conf.masakari_monitors | b64enc }}
 {{- end }}

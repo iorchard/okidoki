@@ -1,0 +1,93 @@
+{{/*
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/}}
+
+{{- if .Values.manifests.daemonset_hostmonitor }}
+{{- $envAll := . }}
+
+{{- $mounts_masakari_hostmonitor := .Values.pod.mounts.masakari_hostmonitor.masakari_hostmonitor }}
+
+{{- $serviceAccountName := "masakari-hostmonitor" }}
+{{ tuple $envAll "api" $serviceAccountName | include "helm-toolkit.snippets.kubernetes_pod_rbac_serviceaccount" }}
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: masakari-hostmonitor
+  annotations:
+    {{ tuple $envAll | include "helm-toolkit.snippets.release_uuid" }}
+  labels:
+{{ tuple $envAll "masakari" "hostmonitor" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 4 }}
+spec:
+  selector:
+    matchLabels:
+{{ tuple $envAll "masakari" "hostmonitor" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 6 }}
+{{ tuple $envAll "hostmonitor" | include "helm-toolkit.snippets.kubernetes_upgrades_daemonset" | indent 2 }}
+  template:
+    metadata:
+      labels:
+{{ tuple $envAll "masakari" "hostmonitor" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
+      annotations:
+{{ tuple $envAll | include "helm-toolkit.snippets.release_uuid" | indent 8 }}
+        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.utils.hash" }}
+        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
+{{ dict "envAll" $envAll "podName" "masakari-hostmonitor" "containerNames" ( list "masakari-hostmonitor" ) | include "helm-toolkit.snippets.kubernetes_mandatory_access_control_annotation" | indent 8 }}
+    spec:
+      serviceAccountName: {{ $serviceAccountName }}
+{{ dict "envAll" $envAll "application" "masakari" | include "helm-toolkit.snippets.kubernetes_pod_security_context" | indent 6 }}
+      affinity:
+{{ tuple $envAll "masakari" "hostmonitor" | include "helm-toolkit.snippets.kubernetes_pod_anti_affinity" | indent 8 }}
+      nodeSelector:
+        {{ .Values.labels.hostmonitor.node_selector_key }}: {{ .Values.labels.hostmonitor.node_selector_value }}
+      terminationGracePeriodSeconds: {{ .Values.pod.lifecycle.termination_grace_period.engine.timeout | default "600" }}
+      hostNetwork: true
+      hostPID: true
+      hostIPC: true
+      containers:
+        - name: masakari-hostmonitor
+{{ tuple $envAll "masakari_hostmonitor" | include "helm-toolkit.snippets.image" | indent 10 }}
+{{ tuple $envAll $envAll.Values.pod.resources.hostmonitor | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
+{{ dict "envAll" $envAll "application" "masakari" "container" "masakari_hostmonitor" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
+          command:
+            - /tmp/masakari-hostmonitor.sh
+            - start
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /tmp/masakari-hostmonitor.sh
+                  - stop
+          volumeMounts:
+            - name: pod-tmp
+              mountPath: /tmp
+            - name: masakari-bin
+              mountPath: /tmp/masakari-hostmonitor.sh
+              subPath: masakari-hostmonitor.sh
+              readOnly: true
+            - name: masakari-monitors-etc
+              mountPath: /etc/masakari-monitors/masakari-monitors.conf
+              subPath: masakari-monitors.conf
+              readOnly: true
+      volumes:
+        - name: pod-tmp
+          emptyDir: {}
+        - name: masakari-bin
+          configMap:
+            name: masakari-bin
+            defaultMode: 0555
+        - name: masakari-monitors-etc
+          secret:
+            secretName: masakari-monitors-etc
+            defaultMode: 0444
+{{ if $mounts_masakari_hostmonitor.volumes }}{{ toYaml $mounts_masakari_hostmonitor.volumes | indent 8 }}{{ end }}
+{{- end }}

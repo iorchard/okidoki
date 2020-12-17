@@ -18,7 +18,7 @@ limitations under the License.
 {{- $mounts_masakari_engine := .Values.pod.mounts.masakari_engine.masakari_engine }}
 
 {{- $serviceAccountName := "masakari-engine" }}
-{{ tuple $envAll "api" $serviceAccountName | include "helm-toolkit.snippets.kubernetes_pod_rbac_serviceaccount" }}
+{{ tuple $envAll "engine" $serviceAccountName | include "helm-toolkit.snippets.kubernetes_pod_rbac_serviceaccount" }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -49,7 +49,7 @@ spec:
       affinity:
 {{ tuple $envAll "masakari" "engine" | include "helm-toolkit.snippets.kubernetes_pod_anti_affinity" | indent 8 }}
       nodeSelector:
-        {{ .Values.labels.api.node_selector_key }}: {{ .Values.labels.api.node_selector_value }}
+        {{ .Values.labels.engine.node_selector_key }}: {{ .Values.labels.engine.node_selector_value }}
       terminationGracePeriodSeconds: {{ .Values.pod.lifecycle.termination_grace_period.engine.timeout | default "600" }}
       containers:
         - name: masakari-engine

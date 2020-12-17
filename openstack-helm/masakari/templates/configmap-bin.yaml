@@ -24,6 +24,10 @@ data:
 {{ tuple "bin/_masakari-api.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
   masakari-engine.sh: |
 {{ tuple "bin/_masakari-engine.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
+  masakari-instancemonitor.sh: |
+{{ tuple "bin/_masakari-instancemonitor.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
+  masakari-hostmonitor.sh: |
+{{ tuple "bin/_masakari-hostmonitor.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
   db-init.py: |
 {{- include "helm-toolkit.scripts.db_init" . | indent 4 }}
   db-sync.sh: |

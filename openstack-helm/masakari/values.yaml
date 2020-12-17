@@ -28,18 +28,25 @@ labels:
   job:
     node_selector_key: openstack-control-plane
     node_selector_value: enabled
-  
+  instancemonitor:
+    node_selector_key: openstack-compute-node
+    node_selector_value: enabled
+  hostmonitor:
+    node_selector_key: openstack-compute-node
+    node_selector_value: enabled
 
 images:
   tags:
     masakari_api: jijisa/centos-source-masakari-api:train
     masakari_engine: jijisa/centos-source-masakari-engine:train
+    masakari_instancemonitor: jijisa/centos-source-masakari-monitors:train
+    masakari_hostmonitor: jijisa/centos-source-masakari-monitors:train
     db_init: docker.io/openstackhelm/heat:train-ubuntu_bionic
     masakari_db_sync: jijisa/centos-source-masakari-api:train
-    db_drop: docker.io/openstackhelm/heat:stein-ubuntu_bionic
-    ks_user: docker.io/openstackhelm/heat:stein-ubuntu_bionic
-    ks_service: docker.io/openstackhelm/heat:stein-ubuntu_bionic
-    ks_endpoints: docker.io/openstackhelm/heat:stein-ubuntu_bionic
+    db_drop: docker.io/openstackhelm/heat:train-ubuntu_bionic
+    ks_user: docker.io/openstackhelm/heat:train-ubuntu_bionic
+    ks_service: docker.io/openstackhelm/heat:train-ubuntu_bionic
+    ks_endpoints: docker.io/openstackhelm/heat:train-ubuntu_bionic
     rabbit_init: docker.io/rabbitmq:3.7-management
     dep_check: quay.io/airshipit/kubernetes-entrypoint:v1.0.0
   pull_policy: "IfNotPresent"
@@ -81,6 +88,17 @@ conf:
       driver: noop
     oslo_middleware:
       enable_proxy_headers_parsing: true
+  masakari_monitors:
+    DEFAULT:
+      debug: false
+      use_syslog: false
+    api:
+      api_interface: internal
+    libvirt:
+      connection_uri: "qemu+tcp://127.0.0.1/system"
+    host:
+      disable_ipmi_check: true
+      restrict_to_remotes: true
 
 network:
   api:
@@ -296,6 +314,12 @@ pod:
         masakari_engine:
           readOnlyRootFilesystem: true
           allowPrivilegeEscalation: false
+        masakari_instancemonitor:
+          readOnlyRootFilesystem: true
+          privileged: true
+        masakari_hostmonitor:
+          readOnlyRootFilesystem: true
+          privileged: true
   affinity:
     anti:
       type:
@@ -319,11 +343,31 @@ pod:
       masakari_db_sync:
         volumeMounts:
         volumes:
+    masakari_instancemonitor:
+      init_container: null
+      masakari_instancemonitor:
+        volumeMounts:
+        volumes:
+    masakari_hostmonitor:
+      init_container: null
+      masakari_hostmonitor:
+        volumeMounts:
+        volumes:
   replicas:
     api: 1
     engine: 1
   lifecycle:
     upgrades:
+      daemonsets:
+        pod_replacement_strategy: RollingUpdate
+        instancemonitor:
+          enabled: true
+          min_ready_seconds: 0
+          max_unavailable: 1
+        hostmonitor:
+          enabled: true
+          min_ready_seconds: 0
+          max_unavailable: 1
       deployments:
         revision_history: 3
         pod_replacement_strategy: RollingUpdate
@@ -350,6 +394,20 @@ pod:
         memory: "1024Mi"
         cpu: "2000m"
     engine:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    instancemonitor:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    hostmonitor:
       requests:
         memory: "128Mi"
         cpu: "100m"
@@ -413,6 +471,8 @@ manifests:
   configmap_etc: true
   deployment_api: true
   deployment_engine: true
+  daemonset_instancemonitor: true
+  daemonset_hostmonitor: true
   ingress_api: true
   job_db_init: true
   job_db_sync: true
@@ -426,4 +486,3 @@ manifests:
   secret_rabbitmq: true
   service_ingress_api: true
   service_api: true
-
