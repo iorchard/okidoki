@@ -1,0 +1,135 @@
+---
+schema: armada/Chart/v1
+metadata:
+  schema: metadata/Document/v1
+  name: helm-toolkit
+data:
+  chart_name: helm-toolkit
+  release: helm-toolkit
+  namespace: helm-tookit
+  values: {}
+  source:
+    type: local
+    location: /home/clex/baco/charts/openstack-helm-infra
+    subpath: helm-toolkit
+  dependencies: []
+---
+schema: armada/Chart/v1
+metadata:
+  schema: metadata/Document/v1
+  name: masakari
+data:
+  chart_name: masakari
+  release: masakari
+  namespace: openstack
+  install:
+    no_hooks: false
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - name: masakari-db-init
+        type: job
+        labels:
+          application: masakari
+          component: db-init
+      - name: masakari-db-sync
+        type: job
+        labels:
+          application: masakari
+          component: db-sync
+      - name: masakari-ks-endpoints
+        type: job
+        labels:
+          application: masakari
+          component: ks-endpoints
+      - name: masakari-ks-service
+        type: job
+        labels:
+          application: masakari
+          component: ks-service
+      - name: masakari-ks-user
+        type: job
+        labels:
+          application: masakari
+          component: ks-user
+  values:
+    images:
+      pull_policy: IfNotPresent
+      tags:
+        masakari_api: "jijisa/centos-source-masakari-api:train"
+        masakari_engine: "jijisa/centos-source-masakari-engine:train"
+        masakari_instancemonitor: "jijisa/centos-source-masakari-monitors:train"
+        masakari_hostmonitor: "jijisa/centos-source-masakari-monitors:train"
+        masakari_db_sync: "jijisa/centos-source-masakari-api:train"
+    conf:
+      masakari:
+        DEFAULT:
+          debug: true
+          os_user_domain_name: default
+          os_project_domain_name: default
+          os_privileged_user_tenant: admin
+          os_privileged_user_name: admin
+          os_privileged_user_password: password
+      masakari_monitors:
+        DEFAULT:
+          debug: true
+    endpoints:
+      identity:
+        auth:
+          admin:
+            username: admin
+            password: password
+          masakari:
+            username: masakari
+            password: password
+        port:
+          api:
+            default: 8080
+            public: 8080
+      instance_ha:
+        port:
+          api:
+            public: 8080
+      oslo_db:
+        auth:
+          admin:
+            username: root
+            password: password
+          masakari:
+            username: masakari
+            password: password
+      oslo_messaging:
+        auth:
+          admin:
+            username: rabbitmq
+            password: password
+          masakari:
+            username: masakari
+            password: password
+        statefulset: null
+  source:
+    type: local
+    location: /home/clex/baco/charts/openstack-helm
+    subpath: masakari
+  dependencies:
+  - helm-toolkit
+---
+schema: armada/ChartGroup/v1
+metadata:
+  schema: metadata/Document/v1
+  name: openstack
+data:
+  description: "Openstack Services"
+  sequenced: False
+  chart_group:
+    - masakari
+---
+schema: armada/Manifest/v1
+metadata:
+  schema: metadata/Document/v1
+  name: baco
+data:
+  release_prefix: baco
+  chart_groups:
+    - openstack
