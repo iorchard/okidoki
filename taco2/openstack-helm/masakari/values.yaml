@@ -73,8 +73,8 @@ conf:
       masakari_api_listen: 0.0.0.0
       os_user_domain_name: default
       os_project_domain_name: default
-      os_privileged_user_tenant: service
-      os_privileged_user_name: nova
+      os_privileged_user_tenant: admin
+      os_privileged_user_name: admin
       os_privileged_user_password: password
       masakari_api_workers: 2
     database:
@@ -309,16 +309,16 @@ pod:
         runAsUser: 42485
       container:
         masakari_api:
-          readOnlyRootFilesystem: true
+          readOnlyRootFilesystem: false
           allowPrivilegeEscalation: false
         masakari_engine:
-          readOnlyRootFilesystem: true
+          readOnlyRootFilesystem: false
           allowPrivilegeEscalation: false
         masakari_instancemonitor:
-          readOnlyRootFilesystem: true
+          readOnlyRootFilesystem: false
           privileged: true
         masakari_hostmonitor:
-          readOnlyRootFilesystem: true
+          readOnlyRootFilesystem: false
           privileged: true
   affinity:
     anti:
@@ -328,6 +328,7 @@ pod:
         default: kubernetes.io/hostname
       weight:
         default: 10
+  dns_policy: "ClusterFirstWithHostNet"
   mounts:
     masakari_api:
       init_container: null

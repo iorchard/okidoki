@@ -53,6 +53,7 @@ spec:
       hostNetwork: true
       hostPID: true
       hostIPC: true
+      dnsPolicy: {{ .Values.pod.dns_policy }}
       containers:
         - name: masakari-hostmonitor
 {{ tuple $envAll "masakari_hostmonitor" | include "helm-toolkit.snippets.image" | indent 10 }}
@@ -78,6 +79,8 @@ spec:
               mountPath: /etc/masakari-monitors/masakari-monitors.conf
               subPath: masakari-monitors.conf
               readOnly: true
+            - name: dev
+              mountPath: /dev
       volumes:
         - name: pod-tmp
           emptyDir: {}
@@ -89,5 +92,8 @@ spec:
           secret:
             secretName: masakari-monitors-etc
             defaultMode: 0444
+        - name: dev
+          hostPath:
+            path: /dev
 {{ if $mounts_masakari_hostmonitor.volumes }}{{ toYaml $mounts_masakari_hostmonitor.volumes | indent 8 }}{{ end }}
 {{- end }}

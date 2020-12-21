@@ -51,7 +51,7 @@ spec:
         {{ .Values.labels.instancemonitor.node_selector_key }}: {{ .Values.labels.instancemonitor.node_selector_value }}
       terminationGracePeriodSeconds: {{ .Values.pod.lifecycle.termination_grace_period.engine.timeout | default "600" }}
       hostNetwork: true
-      hostPID: true
+      dnsPolicy: {{ .Values.pod.dns_policy }}
       containers:
         - name: masakari-instancemonitor
 {{ tuple $envAll "masakari_instancemonitor" | include "helm-toolkit.snippets.image" | indent 10 }}
@@ -73,6 +73,10 @@ spec:
               mountPath: /tmp/masakari-instancemonitor.sh
               subPath: masakari-instancemonitor.sh
               readOnly: true
+            - name: masakari-etc
+              mountPath: /etc/masakari/masakari.conf
+              subPath: masakari.conf
+              readOnly: true
             - name: masakari-monitors-etc
               mountPath: /etc/masakari-monitors/masakari-monitors.conf
               subPath: masakari-monitors.conf
@@ -84,6 +88,10 @@ spec:
           configMap:
             name: masakari-bin
             defaultMode: 0555
+        - name: masakari-etc
+          secret:
+            secretName: masakari-etc
+            defaultMode: 0444
         - name: masakari-monitors-etc
           secret:
             secretName: masakari-monitors-etc
