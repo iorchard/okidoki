@@ -1,6 +1,8 @@
 Install ssh fence agent
 =========================
 
+**Warning**
+
 It is not recommended to use ssh for fence agent.
 It's just a test for how fencing is working.
 
