@@ -1,0 +1,6 @@
+---
+- name: Deploy OkiDoki HA cluster
+  hosts: okidoki
+  roles:
+    - { role: okidoki, tags: okidoki }
+...

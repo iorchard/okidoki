@@ -1,0 +1,84 @@
+---
+#
+# common
+#
+- name: config | Setting hacluster password
+  user:
+    name: "hacluster"
+    password: "{{ pacemaker_hacluster_password | password_hash('sha512', 'mysecretsalt') }}"
+  become: true
+  when: inventory_hostname in groups.okidoki
+
+#
+# config for controllers
+#
+- name: config | Authenticate all controllers
+  expect:
+    command: pcs cluster auth {{ groups.okidoki_controllers | join(' ') }}
+    responses:
+      'Username': 'hacluster'
+      'Password': "{{ pacemaker_hacluster_password }}"
+  become: true
+  when: inventory_hostname == pacemaker_primary_server
+
+- name: config | Set up HA cluster
+  command: pcs cluster setup --name {{ corosync_cluster_name }} {{ groups.okidoki_controllers | join(' ') }}
+  become: true
+  ignore_errors: yes
+  when: inventory_hostname == pacemaker_primary_server
+
+- name: config | Start HA cluster
+  command: pcs cluster start --all
+  become: true
+  when: inventory_hostname == pacemaker_primary_server
+
+- name: config | Disable stonith to avoid having to cover fencing device
+  command: pcs property set stonith-enabled=false
+  become: true
+  when: inventory_hostname == pacemaker_primary_server
+
+#
+# config for workers
+#
+- name: config | Capturing corosync authkey
+  slurp:
+    src: "{{ corosync_authkey_file }}"
+  become: true
+  register: "_corosync_authkey_"
+  #no_log: true
+  changed_when: false
+  when: inventory_hostname == pacemaker_primary_server
+
+- name: config | Setting fact for authkey on workers
+  set_fact:
+    _corosync_authkey_: "{{ hostvars[pacemaker_primary_server]['_corosync_authkey_'] }}"
+  #no_log: true
+  when: inventory_hostname in groups.okidoki_workers
+
+- name: config | Configuring authkey on workers
+  template:
+    src: "etc/corosync/authkey.j2"
+    dest: "{{ corosync_authkey_file }}"
+    owner: "hacluster"
+    group: "haclient"
+    mode: "u=r,g=,o="
+  become: true
+  #no_log: true
+  when: inventory_hostname in groups.okidoki_workers
+
+- name: config | Authenticate all workers
+  expect:
+    command: pcs cluster auth {{ groups.okidoki_workers | join(' ') }}
+    responses:
+      'Username': 'hacluster'
+      'Password': "{{ pacemaker_hacluster_password }}"
+  become: true
+  when: inventory_hostname == pacemaker_primary_server
+
+- name: config | Add all workers as remote nodes
+  command: pcs cluster node add-remote {{ item }}
+  with_items: "{{ groups.okidoki_workers }}"
+  become: true
+  when: inventory_hostname == pacemaker_primary_server
+  ignore_errors: yes
+...

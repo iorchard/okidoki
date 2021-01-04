@@ -1,0 +1,14 @@
+---
+#- name: print all available facts
+#  debug:
+#    var: ansible_facts
+#
+- import_tasks: redhat.yml
+  when:
+    - ansible_os_family == "RedHat"
+  tags:
+    - okidoki_prerequisites
+
+- import_tasks: config.yml
+  tags:
+    - okidoki_config

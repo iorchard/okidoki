@@ -1,0 +1,29 @@
+---
+- name: redhat | Installing python packages for controllers
+  pip:
+    name: 'pexpect'
+  become: true
+  when: inventory_hostname in groups.okidoki_controllers
+
+- name: redhat | Installing rpm packages for controllers
+  yum:
+    name: ['pacemaker', 'pcs', 'psmisc', 'policycoreutils-python']
+    state: "present"
+  become: true
+  when: inventory_hostname in groups.okidoki_controllers
+  notify:
+    - restart pcsd
+
+- name: redhat | Installing rpm packages for workers
+  yum:
+    name: ['pacemaker-remote', 'pcs', 'resource-agents']
+    state: "present"
+  become: true
+  when: inventory_hostname in groups.okidoki_workers
+
+- name: redhat | Confirm pcsd is started
+  systemd:
+    name: pcsd
+    state: started
+  become: true
+...

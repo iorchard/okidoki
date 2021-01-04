@@ -1,0 +1,7 @@
+---
+okidoki_enabled: true
+corosync_authkey_file: '/etc/pacemaker/authkey'
+corosync_cluster_name: 'okidoki'
+pacemaker_hacluster_password: 'password'
+pacemaker_primary_server: '{{ groups.okidoki_controllers[0] }}'
+...
