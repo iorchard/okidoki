@@ -111,3 +111,38 @@ Create a host in a segment.::
 
    # openstack segment host create <compute_hostname> COMPUTE SSH okidoki
 
+Manual process after evacuation from host failure
+----------------------------------------------------
+
+When hostmonitor on other nodes detects HA cluster failure of the host, 
+it sends a notification to masakari-api and masakari-engine picks up the
+notification and process to evacuate VM instances on the failed host.
+
+The masakari-engine 
+
+#. sets on_maintenance flag for the failed host in masakari database and
+#. disables compute service of the failed host and
+#. wait for 3 minutes for openstack to make the failed host in down state.
+#. Then, it evacuates VM instances of the failed host using nova api and
+#. confirms VM instances are evacuated well and 
+#. finally, it sets the notification state to finished.
+
+After the failed host is booted, it cannot run VM instance since it's compute
+service is disabled. So do the following manual processes to make the failed
+host go back to normal compute service.
+
+#. Set nova-compute service to enable.::
+
+   $ openstack compute service set --enable <hostname> nova-compute
+
+#. Set on_maintenance to False for masakari segment.::
+
+   $ openstack segment host update --on_maintenance False okidoki <hostname>
+
+#. Confirm the host is in online state for remote node.::
+
+   $ sudo pcs status nodes both
+   ...
+   Pacemaker Remote Nodes:
+     Online: <hostname> <hostname> ...
+

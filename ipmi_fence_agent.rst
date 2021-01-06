@@ -55,14 +55,21 @@ Verify the stonith configuration.::
 Test fencing
 --------------
 
-To test fencing, cut the HA cluster network connection in one of worker nodes.
+There are many ways to test fencing.
+
+* Cut the HA cluster network connection of one of worker nodes.
 
 Let's say worker1's HA cluster network interface is eth0.
 Cut the HA cluster network like this.::
 
    $ sudo ifconfig eth0 0.0.0.0
 
-Then, stonith-<worker_hostname> resource will pick up the failure of the node
-and run ssh fence job through fencing network.
+* Trigger kernel panic.
 
+Force to trigger kernel panic on one of worker ndoes.::
+
+   $ echo c | sudo tee /proc/sysrq-trigger
+
+Then, stonith-<worker_hostname> resource will pick up the failure of the node
+and run fence job through fencing network.
 

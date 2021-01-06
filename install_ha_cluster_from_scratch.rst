@@ -1,12 +1,14 @@
 Install HA Cluster from scratch
 =================================
 
-This is a guide to install HA cluster for openstack masakari service.
+This is a guide to install HA cluster from scratch.
 
 I assume there are 3 controllers and 3 workers.
 
 * controllers: taco2-ctrl{1,2,3} (192.168.21.4{1,2,3})
 * workers: taco2-comp{1,2,3}     (192.168.21.4{4,5,6})
+
+All machines are CentOS 7.8.
 
 Set up Corosync and Pacemaker on controllers
 ---------------------------------------------
