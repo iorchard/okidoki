@@ -1,0 +1,11 @@
+---
+features:
+  - |
+    Added following new REST API's for masakari operators:
+
+    - GET /v1/segments - Returns list of all failover segments.
+    - GET /v1/segments/<segment_uuid> - Returns specific failover segment
+      with uuid.
+    - POST /v1/segments - Creates a new failover segment
+    - PUT /v1/segments/<segment_uuid> - Updates a failover segment by uuid
+    - DELETE /v1/segments/<segment_uuid> - Delete a failover segment by uuid

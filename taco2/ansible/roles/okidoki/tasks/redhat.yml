@@ -7,7 +7,7 @@
 
 - name: redhat | Installing rpm packages for controllers
   yum:
-    name: ['pacemaker', 'pcs', 'psmisc', 'policycoreutils-python']
+    name: ['pacemaker', 'pcs', 'psmisc', 'policycoreutils-python', 'fence-agents-ipmilan']
     state: "present"
   become: true
   when: inventory_hostname in groups.okidoki_controllers

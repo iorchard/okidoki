@@ -128,8 +128,8 @@ data:
 schema: armada/Manifest/v1
 metadata:
   schema: metadata/Document/v1
-  name: baco
+  name: taco
 data:
-  release_prefix: baco
+  release_prefix: taco
   chart_groups:
     - openstack
