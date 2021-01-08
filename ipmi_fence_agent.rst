@@ -11,6 +11,22 @@ There should be at least two networks - HA cluster network and fencing network
 * HA Cluster network: corosync membership network
 * Fencing network: the network to use for fencing (ssh, IPMI, etc.)
 
+Check if IPMI udp port(623) is reachable from controllers.::
+
+   $ nc -v -u -z -w 3 192.168.100.54 623
+   Ncat: Version 7.50 ( https://nmap.org/ncat )
+   Ncat: Connected to 192.168.100.54:623.
+   Ncat: UDP packet sent successfully
+
+If you have "Ncat: Connection refused.", IPMI udp port 623 is not opened for
+the machine. You should go to BIOS setup to enable IPMI.
+
+This is the process to enable IPMI for HP machines.
+
+HP iLO5 web console login -> Security menu -> Access Settings ->
+Edit Network Settings -> IPMI/DCMI over LAN (check)
+
+
 Install
 ----------
 
