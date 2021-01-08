@@ -34,23 +34,37 @@ Install the fence-agents-ipmilan pacakge in all controller nodes.::
 
    $ sudo yum install -y fence-agents-ipmilan
 
+If you deployed HA cluster using ansible playbook provided by okidoki,
+it should be installed already.
+
+Verify the fence agent works properly.::
+
+   [clex@taco2-adm-001 ~]$ sudo fence_ipmilan \
+                              --ip=<ipmi_ip> \
+                              --username=<ipmi_username> \
+                              --password=<ipmi_password> \
+                              --action=status --lanplus
+
+You should see the response like "Status: ON".
+
+
 Set ipmi user password env variable.::
 
-   $ read -s -p 'ipmi user pw: ' USERPW
-   $ export USERPW
+   $ read -s -p 'ipmi user pw: ' IPMIPW
+   $ export IPMIPW
 
 Create fence devices for all worker nodes in pacemaker.::
 
    $ sudo -E pcs stonith create stonith-<worker_hostname> \
       fence_ipmilan pcmk_host_list="<worker_hostname>" \
       ipaddr="<worker_ipmi_ip>" \
-      login="<ipmi_username>" passwd="$USERPW" lanplus=true
+      login="<ipmi_username>" passwd="$IPMIPW" lanplus=true
 
    $ sudo pcs constraint location add stonith-<worker_hostname>-loc \
       stonith-<worker_hostname> <worker_hostname> INFINITY
 
 
-USERPW should be the <ipmi_username>'s password on each worker node.
+IPMIPW should be the <ipmi_username>'s password on each worker node.
 
 Replace worker_hostname and username appropriately.
 
