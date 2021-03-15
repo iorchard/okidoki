@@ -127,7 +127,7 @@ The masakari-engine
 #. confirms VM instances are evacuated well and 
 #. finally, it sets the notification state to finished.
 
-After the failed host is booted, it cannot run VM instance since it's compute
+After the failed host is booted, it cannot run VM instance since its compute
 service is disabled. So do the following manual processes to make the failed
 host go back to normal compute service.
 
@@ -138,6 +138,11 @@ host go back to normal compute service.
 #. Set on_maintenance to False for masakari segment.::
 
    $ openstack segment host update --on_maintenance False okidoki <hostname>
+
+#. Clean up resource and stonith history.::
+
+   $ sudo pcs resource cleanup
+   $ sudo pcs stonith cleanup
 
 #. Confirm the host is in online state for remote node.::
 
