@@ -75,6 +75,9 @@ spec:
             tcpSocket:
               port: {{ tuple "instance_ha" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
           volumeMounts:
+            - name: timezone-config
+              mountPath: /etc/localtime
+              readOnly: true
             - name: pod-tmp
               mountPath: /tmp
             - name: masakari-bin
@@ -86,6 +89,9 @@ spec:
               subPath: masakari.conf
               readOnly: true
       volumes:
+        - name: timezone-config
+          hostPath:
+            path: /etc/localtime
         - name: pod-tmp
           emptyDir: {}
         - name: masakari-bin
