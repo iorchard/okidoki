@@ -21,9 +21,10 @@
   become: true
   when: inventory_hostname in groups.okidoki_workers
 
-- name: redhat | Confirm pcsd is started
+- name: redhat | Confirm pcsd is enabled and started
   systemd:
     name: pcsd
+    enabled: yes
     state: started
   become: true
 ...
