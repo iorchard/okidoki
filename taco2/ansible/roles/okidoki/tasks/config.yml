@@ -81,4 +81,9 @@
   become: true
   when: inventory_hostname == pacemaker_primary_server
   ignore_errors: yes
+
+- name: config | Set resource-stickiness to 100.
+  command: pcs resource defaults resource-stickiness=100
+  become: true
+  when: inventory_hostname == pacemaker_primary_server
 ...
