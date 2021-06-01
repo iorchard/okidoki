@@ -107,7 +107,7 @@ Create a segment.::
 
    # openstack segment create okidoki auto COMPUTE
 
-Create a host in a segment.::
+Create all compute hosts in a segment.::
 
    # openstack segment host create <compute_hostname> COMPUTE SSH okidoki
 
