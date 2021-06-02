@@ -10,7 +10,7 @@ data:
   values: {}
   source:
     type: local
-    location: /home/clex/baco/charts/openstack-helm-infra
+    location: /home/clex/taco/charts/openstack-helm-infra
     subpath: helm-toolkit
   dependencies: []
 ---
@@ -110,7 +110,7 @@ data:
         statefulset: null
   source:
     type: local
-    location: /home/clex/baco/charts/openstack-helm
+    location: /home/clex/taco/charts/openstack-helm
     subpath: masakari
   dependencies:
   - helm-toolkit

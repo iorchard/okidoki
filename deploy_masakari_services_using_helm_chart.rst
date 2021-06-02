@@ -2,32 +2,32 @@ Deploy masakari services using helm chart
 ==============================================
 
 This is a guide to deploy masakari services with custom-built images
-using helm chart in TACO2 environment.
+using helm chart in TACO environment.
 
 Pre-requisites
 ---------------
 
-* TACO2 should be already installed.
+* TACO should be already installed.
 
 Deploy masakari helm chart using armada
 ------------------------------------------
 
-TACO2 uses armada as a deployment tool.
+TACO uses armada as a deployment tool.
 
-Copy maskari helm chart to your taco2 helm chart location.::
+Copy maskari helm chart to your taco helm chart location.::
 
-   $ cp -a <path/to/okidoki>/taco2/openstack-helm/masakari \
-            <path/to/taco2>/charts/openstack-helm/
+   $ cp -a <path/to/okidoki>/taco/openstack-helm/masakari \
+            <path/to/taco>/charts/openstack-helm/
 
 There is a armada manifest file (masakari-manifest.yaml) for masakari 
-in okidoki/taco2/armada.
+in okidoki/taco/armada.
 
 Edit the file to change password and location of source.::
 
-   $ vi <path/to/okidoki>/taco2/armada/masakari-manifest.yaml
+   $ vi <path/to/okidoki>/taco/armada/masakari-manifest.yaml
    source:
      type: local
-     location: /home/clex/baco/charts/openstack-helm-infra
+     location: /home/clex/taco/charts/openstack-helm-infra
      subpath: helm-toolkit
    ...
     conf:
@@ -54,7 +54,7 @@ Edit the file to change password and location of source.::
    ...
    source:
      type: local
-     location: /home/clex/baco/charts/openstack-helm
+     location: /home/clex/taco/charts/openstack-helm
      subpath: masakari
 
 Run armada.::
@@ -63,7 +63,7 @@ Run armada.::
       --tiller-host <any_controller_ip> \
       --tiller-port 32134 \
       --timeout 600 \
-      <path/to/okidoki>/taco2/armada/masakari-manifest.yaml
+      <path/to/okidoki>/taco/armada/masakari-manifest.yaml
 
 See helm list.::
 
