@@ -55,6 +55,16 @@
   #no_log: true
   when: inventory_hostname in groups.okidoki_workers
 
+- name: config | Create pacemaker directory
+  file:
+    path: "{{ corosync_authkey_file | dirname }}"
+    mode: "0755"
+    owner: "root"
+    group: "root"
+    state: directory
+  become: true
+  when: inventory_hostname in groups.okidoki_workers
+
 - name: config | Configuring authkey on workers
   template:
     src: "etc/corosync/authkey.j2"

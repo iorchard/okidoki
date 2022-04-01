@@ -63,6 +63,9 @@ data:
         masakari_hostmonitor: "jijisa/centos-source-masakari-monitors:train"
         masakari_db_sync: "jijisa/centos-source-masakari-api:train"
     conf:
+      db_acl:
+        enabled: true
+        allow_network: 10.233.64.0/18
       masakari:
         DEFAULT:
           debug: true
@@ -70,7 +73,10 @@ data:
           os_project_domain_name: default
           os_privileged_user_tenant: admin
           os_privileged_user_name: admin
-          os_privileged_user_password: password
+          os_privileged_user_password: <password>
+          # shorten the wait time after node failure to 60 seconds
+          # at your own risk!!!
+          #wait_period_after_service_update: 60
       masakari_monitors:
         DEFAULT:
           debug: true
@@ -79,10 +85,10 @@ data:
         auth:
           admin:
             username: admin
-            password: password
+            password: <password>
           masakari:
             username: masakari
-            password: password
+            password: <password>
         port:
           api:
             default: 8080
@@ -95,18 +101,18 @@ data:
         auth:
           admin:
             username: root
-            password: password
+            password: <password>
           masakari:
             username: masakari
-            password: password
+            password: <password>
       oslo_messaging:
         auth:
           admin:
             username: rabbitmq
-            password: password
+            password: <password>
           masakari:
             username: masakari
-            password: password
+            password: <password>
         statefulset: null
   source:
     type: local

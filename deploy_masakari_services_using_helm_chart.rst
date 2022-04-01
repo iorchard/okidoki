@@ -30,32 +30,53 @@ Edit the file to change password and location of source.::
      location: /home/clex/taco/charts/openstack-helm-infra
      subpath: helm-toolkit
    ...
-    conf:
-      masakari:
-        DEFAULT:
-          debug: true
-          os_user_domain_name: default
-          os_project_domain_name: default
-          os_privileged_user_tenant: admin
-          os_privileged_user_name: admin
-          os_privileged_user_password: password
-      masakari_monitors:
-        DEFAULT:
-          debug: true
-    endpoints:
-      identity:
-        auth:
-          admin:
-            username: admin
-            password: password
-          masakari:
-            username: masakari
-            password: password
-   ...
+     conf:
+      db_acl:
+        enabled: true
+        allow_network: 10.233.64.0/18
+       masakari:
+         DEFAULT:
+           debug: true
+           os_project_domain_name: default
+           os_privileged_user_tenant: admin
+           os_privileged_user_name: admin
+          os_privileged_user_password: <password>
+          # shorten the wait time after node failure to 60 seconds
+          # at your own risk!!!
+          #wait_period_after_service_update: 60
+       masakari_monitors:
+         DEFAULT:
+           debug: true
+         auth:
+           admin:
+             username: admin
+             password: <password>
+           masakari:
+             username: masakari
+             password: <password>
+         port:
+           api:
+             default: 8080
+         auth:
+           admin:
+             username: root
+             password: <password>
+           masakari:
+             username: masakari
+             password: <password>
+       oslo_messaging:
+         auth:
+           admin:
+             username: rabbitmq
+             password: <password>
+           masakari:
+             username: masakari
+             password: <password>
+         statefulset: null
    source:
      type: local
-     location: /home/clex/taco/charts/openstack-helm
-     subpath: masakari
+
+Change
 
 Run armada.::
 
