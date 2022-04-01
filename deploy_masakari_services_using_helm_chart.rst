@@ -76,7 +76,8 @@ Edit the file to change password and location of source.::
    source:
      type: local
 
-Change
+Change <password> to the right password.
+
 
 Run armada.::
 

@@ -76,6 +76,7 @@ data:
           os_privileged_user_password: <password>
           # shorten the wait time after node failure to 60 seconds
           # at your own risk!!!
+          # default: 180 seconds
           #wait_period_after_service_update: 60
       masakari_monitors:
         DEFAULT:
